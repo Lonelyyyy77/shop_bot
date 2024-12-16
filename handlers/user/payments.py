@@ -34,11 +34,9 @@ async def buy_product(callback_query: CallbackQuery):
 
     if photo_paths:
         try:
-            # Логируем путь фото
             logging.info(f"Попытка загрузить фото с пути: {photo_paths[0]}")
 
-            # Загружаем фото с помощью вашей функции
-            photo = await load_product_photo(photo_paths[0])  # Функция возвращает FSInputFile
+            photo = await load_product_photo(photo_paths[0])
             logging.info(f"Фото загружено с пути: {photo_paths[0]}")
 
             await callback_query.message.delete()

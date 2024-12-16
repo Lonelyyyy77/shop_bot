@@ -32,7 +32,7 @@ async def start_adding_category(c: CallbackQuery):
         category_kb.add(
             InlineKeyboardButton(
                 text=category['name'],
-                callback_data=f"choose_category_{category['name']}"  # Используем ID вместо пути
+                callback_data=f"choose_category_{category['name']}"
             )
         )
 
@@ -51,9 +51,8 @@ async def start_adding_category(c: CallbackQuery):
 
 @router.callback_query(lambda c: c.data.startswith("choose_category_"))
 async def catalog(callback_query: CallbackQuery):
-    category_name = callback_query.data.split("_", maxsplit=2)[2]  # Извлекаем имя категории
+    category_name = callback_query.data.split("_", maxsplit=2)[2]
 
-    # Получаем товары по имени категории
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     cursor.execute("SELECT id, name FROM catalog_products WHERE category = ?", (category_name,))
@@ -65,14 +64,12 @@ async def catalog(callback_query: CallbackQuery):
         await callback_query.answer()
         return
 
-    # Генерация кнопок с товарами
     product_kb = InlineKeyboardBuilder()
     for product_id, product_name in products:
         product_kb.add(
             InlineKeyboardButton(text=product_name, callback_data=f"product_{product_id}")
         )
 
-    # Загрузка фото из меню
     menu_images = get_menu_images_from_db()
     photo = None
     for menu_image in menu_images:
@@ -83,7 +80,6 @@ async def catalog(callback_query: CallbackQuery):
             except Exception as e:
                 logging.error(f"Ошибка загрузки фото для каталога: {e}")
 
-    # Отправка фото с кнопками товаров
     if photo:
         await callback_query.message.answer_photo(
             photo, caption=f"Товары в категории *{category_name}*: 👇",
@@ -122,8 +118,7 @@ async def show_product_details(callback_query: CallbackQuery):
     kb = InlineKeyboardBuilder()
     kb.row(InlineKeyboardButton(text='Back to catalogue', callback_data='catalog'))
 
-    # Теперь передаем только цену в pp_kb
-    kb.row(InlineKeyboardButton(text='Buy', callback_data=f'buy_{product_id}_{price}'))  # Передаем ID и цену
+    kb.row(InlineKeyboardButton(text='Buy', callback_data=f'buy_{product_id}_{price}'))
     kb = kb.as_markup()
 
     if photo_paths:

@@ -26,7 +26,6 @@ paypalrestsdk.configure({
 
 def pp_kb(amount, product_id, photo_paths):
     keyboard = InlineKeyboardBuilder()
-    # Преобразуем photo_paths в строку, если нужно передавать через callback_data
     photo_paths_str = '|'.join(photo_paths)
     keyboard.add(
         InlineKeyboardButton(text=f"${amount}", callback_data=f"generate_payment_{product_id}_{amount}_{photo_paths_str}")
@@ -37,15 +36,13 @@ def pp_kb(amount, product_id, photo_paths):
 
 @router.callback_query(lambda callback: callback.data.startswith("generate_payment_"))
 async def generate_payment(callback: CallbackQuery):
-    # Разбираем callback_data, чтобы извлечь product_id, price и image_paths
     data = callback.data.split("_")
-    product_id = data[1]  # Получаем ID товара
-    amount = data[2]  # Получаем цену товара
-    image_paths = data[3]  # Получаем пути к изображениям товара
+    product_id = data[1]
+    amount = data[2]
+    image_paths = data[3]
 
     logging.info(f"Инициализация платежа на сумму ${amount} для товара с ID {product_id}")
 
-    # Извлекаем информацию о товаре из базы данных
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     cursor.execute("SELECT name, desc FROM catalog_products WHERE id = ?", (product_id,))
@@ -60,7 +57,6 @@ async def generate_payment(callback: CallbackQuery):
     product_name, description = product
     message_text = f"*{product_name}*\n\n{description}\n💰 *Цена:* {amount} руб."
 
-    # Генерация ссылки на оплату
     payment = paypalrestsdk.Payment({
         "intent": "sale",
         "payer": {"payment_method": "paypal"},
@@ -93,7 +89,6 @@ async def generate_payment(callback: CallbackQuery):
         payment_keyboard.add(InlineKeyboardButton(text=f"У меня есть PayPal", url=payment_link))
         payment_keyboard.add(InlineKeyboardButton(text="У меня нету PayPal", url="https://www.paypal.com/signup"))
 
-        # Загружаем фото товара
         photo_paths = image_paths.split('|')
         if photo_paths:
             for photo_path in photo_paths:

@@ -15,32 +15,30 @@ router = Router()
 @router.callback_query(lambda c: c.data == 'add_product')
 async def start_adding_product(c: CallbackQuery, state: FSMContext):
     await c.message.delete()
-    await state.set_state(ProductForm.name)  # Устанавливаем начальное состояние
+    await state.set_state(ProductForm.name)
     await c.message.answer("Введите название товара:")
 
 
-# Обработка ввода названия товара
 @router.message(ProductForm.name)
 async def process_product_name(message: Message, state: FSMContext):
     product_name = message.text
-    await state.update_data(product_name=product_name)  # Сохраняем в state
+    await state.update_data(product_name=product_name)
 
     await message.answer("Введите цену товара:")
-    await state.set_state(ProductForm.price)  # Переходим к следующему состоянию
+    await state.set_state(ProductForm.price)
 
 
-# Обработка ввода цены товара
 @router.message(ProductForm.price)
 async def process_product_price(message: Message, state: FSMContext):
     try:
         product_price = float(message.text)
-        await state.update_data(product_price=product_price)  # Сохраняем в state
+        await state.update_data(product_price=product_price)
     except ValueError:
         await message.answer("Неверный формат цены. Введите число.")
         return
 
     await message.answer("Введите описание товара:")
-    await state.set_state(ProductForm.desc)  # Переходим к следующему состоянию
+    await state.set_state(ProductForm.desc)
 
 
 @router.message(ProductForm.desc)
