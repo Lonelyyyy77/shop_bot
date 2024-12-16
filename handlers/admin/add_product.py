@@ -14,8 +14,9 @@ router = Router()
 
 @router.callback_query(lambda c: c.data == 'add_product')
 async def start_adding_product(c: CallbackQuery, state: FSMContext):
+    await c.message.delete()
     await state.set_state(ProductForm.name)  # Устанавливаем начальное состояние
-    await c.message.edit_text("Введите название товара:")
+    await c.message.answer("Введите название товара:")
 
 
 # Обработка ввода названия товара

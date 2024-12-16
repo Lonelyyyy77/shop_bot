@@ -27,9 +27,17 @@ def create_tables():
                 """)
 
         cursor.execute("""
-                        CREATE TABLE IF NOT EXISTS categories (
-                            id INTEGER PRIMARY KEY AUTOINCREMENT,
-                            name STRING
-                        )
-                        """)
+                    CREATE TABLE IF NOT EXISTS categories (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        name STRING
+                    )
+                    """)
+
+        cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS menu_images (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        button_text TEXT NOT NULL,
+                        image_path TEXT
+                    )
+                    """)
         conn.commit()

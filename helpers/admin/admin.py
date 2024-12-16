@@ -3,7 +3,7 @@ import os
 
 
 def create_photo_folder():
-    if not os.path.exists("C:/Users/G5/PycharmProjects/white_bot/"):
+    if not os.path.exists("//"):
         os.makedirs('product_photos')
 
 

@@ -1,0 +1,10 @@
+[phases.setup]
+runtime = "python"
+
+[phases.build]
+commands = [
+    "apt-get update && apt-get install -y python3-tk"
+]
+
+[phases.start]
+cmd = "python bot.py"

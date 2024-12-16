@@ -10,8 +10,9 @@ router = Router()
 
 @router.callback_query(lambda c: c.data == 'add_category')
 async def start_adding_category(c: CallbackQuery, state: FSMContext):
+    await c.message.delete()
     await state.set_state(Categories.name)
-    await c.message.edit_text("Введите название категории товара:")
+    await c.message.answer("Введите название категории товара:")
 
 
 @router.message(Categories.name)

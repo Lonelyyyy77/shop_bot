@@ -8,5 +8,11 @@ class ProductForm(StatesGroup):
     image_path = State()
     category = State()
 
+
 class Categories(StatesGroup):
     name = State()
+
+
+class MenuButtons(StatesGroup):
+    waiting_for_button = State()
+    waiting_for_image = State()
