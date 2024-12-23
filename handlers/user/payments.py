@@ -2,13 +2,48 @@ import logging
 import sqlite3
 
 from aiogram import Router
-from aiogram.types import CallbackQuery, InputFile
+from aiogram.types import CallbackQuery, InputFile, InlineKeyboardButton, InlineQueryResult
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from database.db import DB_NAME
-from helpers.payments.pay_pal import pp_kb
 from helpers.user.load_photos import load_product_photo
 
 router = Router()
+
+
+def pp_kb(amount, product_name):
+    keyboard = InlineKeyboardBuilder()
+    keyboard.add(
+        InlineKeyboardButton(
+            text=f"${amount}",
+            callback_data=f"generate_payment_{amount}_for_{product_name}"
+        )
+    )
+    return keyboard
+
+
+@router.callback_query(lambda c: c.data.startswith('p_ch_buy_'))
+async def payment_choose(callback_query: CallbackQuery):
+    data = callback_query.data.split("_")
+    product_id = data[3]
+    price = data[4]
+    product_name = " ".join(data[5:]).replace("_", " ")
+
+    logging.info(f"Выбор метода оплаты для товара ID: {product_id}, сумма: {price}, название: {product_name}")
+
+    kb = InlineKeyboardBuilder()
+    kb.row(InlineKeyboardButton(text='💳 Оплатить через PayPal',
+                                callback_data=f'generate_payment_{product_id}_{price}_{product_name}'))
+    kb.row(InlineKeyboardButton(text='Оплатить через телеграм звезды',
+                                callback_data=f'stars_payment_{product_id}_{price}_{product_name}'))
+    kb.row(InlineKeyboardButton(text='🔙 Назад к товару', callback_data=f'product_{product_id}_{product_name}'))
+
+    await callback_query.message.answer(
+        text=f"Выберите метод оплаты для товара *{product_name}*:",
+        reply_markup=kb.as_markup()
+    )
+
+    await callback_query.answer()
 
 
 @router.callback_query(lambda c: c.data.startswith("buy_"))
@@ -41,11 +76,11 @@ async def buy_product(callback_query: CallbackQuery):
 
             await callback_query.message.delete()
             await callback_query.message.answer_photo(
-                photo, caption=message_text,
+                photo,
+                caption=message_text,
                 parse_mode="Markdown",
-                # reply_markup=pp_kb(amount=price, product_id=product_id, photo_paths=image_paths)
+                reply_markup=pp_kb(amount=price, product_name=product_name).as_markup()
             )
-            ## проблема выше, в выводе, само фото выводится
 
         except Exception as e:
             logging.error(f"Ошибка загрузки фото для товара {product_name}: {e}")
@@ -58,5 +93,3 @@ async def buy_product(callback_query: CallbackQuery):
         )
 
     await callback_query.answer()
-
-

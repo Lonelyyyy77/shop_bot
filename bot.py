@@ -17,6 +17,7 @@ from handlers.user.about_us import router as user_about_us_router
 from handlers.user.support import router as user_support_router
 from handlers.user.payments import router as user_payments_router
 from helpers.payments.pay_pal import router as pay_pal_router
+from helpers.payments.stars import router as pay_stars_router
 
 from database.admin.menu_images import get_menu_images_from_db
 from database.db import create_tables
@@ -94,6 +95,7 @@ async def main():
     dp.include_router(user_support_router)
     dp.include_router(user_payments_router)
     dp.include_router(pay_pal_router)
+    dp.include_router(pay_stars_router)
 
     await dp.start_polling(bot)
 
